@@ -27,10 +27,11 @@ function processData($jsonArray)
 	$currentJsonRow = [];
 	foreach ($jsonArray as $jsonRow)
 	{
-		if ($currentJsonRow['d'] == null || $jsonRow->d != $currentJsonRow['d'])
+		if (!array_key_exists('d', $currentJsonRow) || $jsonRow->d != $currentJsonRow['d'])
 		{
-			if ($currentJsonRow['d'] != null)
+			if (!array_key_exists('d', $currentJsonRow))
 			{
+				echo json_encode($currentJsonRow);
 				array_push($newJsonArray, json_encode($currentJsonRow));
 				$currentJsonRow = [];
 			}
