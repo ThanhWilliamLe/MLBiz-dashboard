@@ -79,6 +79,7 @@ body
 	height: auto;
 	min-height: 10em;
 	width: 0;
+	background-color: #dddddd;
 }
 
 .tab-setting-toggle div
@@ -100,7 +101,7 @@ body
 	justify-content: space-evenly;
 	width: auto;
 	height: auto;
-	background-color: #eeeeee;
+	background-color: #dddddd;
 	color: black;
 	padding: 1em 1em;
 	margin: 0;
@@ -122,5 +123,4 @@ body
 	flex-grow: 100;
 	overflow: auto;
 	overflow-y: scroll;
-	background-color: #fff;
 }
