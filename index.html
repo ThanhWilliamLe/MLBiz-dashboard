@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>ML Biz</title>
+	<link rel="icon" type="image/png" href="favicon.png">
+	<link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="//storage.googleapis.com/code.getmdl.io/1.0.1/material.green-cyan.min.css"/>
+	<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,500,400italic,700,700italic'>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="index.css">
+
+	<script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script src="//storage.googleapis.com/code.getmdl.io/1.0.1/material.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"></script>
+	<script src="https://www.w3schools.com/lib/w3.js"></script>
+	<script src="kpi-track-fetch.js"></script>
+</head>
+<body style="background-color: white">
+<div id="top">
+	<div id="title">
+		<img src="icon.png"/>
+		<h3>Business team dashboards</h3>
+	</div>
+</div>
+<div id="tabbuttons">
+	<button class="mdl-button mdl-button--colored" onclick='$("#top, #top *").slideToggle()'>Toggle top</button>
+	<button class="mdl-button mdl-button--colored" onclick="openTab(this, 'kpi')">KPI tracking</button>
+</div>
+<div id="tabs">
+	<div class="tab-holder" id="tab-kpi">
+		<div class="tab">
+			<button class="mdl-button mdl-button--colored tab-setting-toggle" onclick="openSettingDiv(this)">
+				<div>Settings</div>
+			</button>
+			<div class="tab-settings" id="tab-kpi-settings" w3-include-html="kpi-track-settings.html"></div>
+			<div class="tab-content" w3-include-html="kpi-track-cards.html"></div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+
+<script>
+	w3.includeHTML(initPage);
+
+	function initPage()
+	{
+		$("#tabbuttons").children()[1].click();
+		$(".tab-setting-toggle").click();
+		$('[data-toggle="tooltip"]').tooltip();
+
+		kpiTrackUpdate();
+	}
+
+	function openTab(thisButton, name)
+	{
+		var tabbuttons = document.getElementById('tabbuttons');
+		var buttons = tabbuttons.getElementsByTagName('*');
+		for (var i = 0; i < buttons.length; i++)
+		{
+			var button = buttons[i];
+			if (button != thisButton) button.classList.remove('mdl-button--colored');
+			else button.classList.add('mdl-button--colored');
+		}
+
+		var tabsparent = document.getElementById('tabs');
+		var tabs = tabsparent.getElementsByClassName('tab-holder');
+		for (var i = 0; i < tabs.length; i++)
+		{
+			var tab = tabs[i];
+			if (tab.id.includes(name)) tab.style.display = 'flex';
+			else tab.style.display = 'none';
+		}
+	}
+
+	function openSettingDiv(button)
+	{
+		var parent = button.parentNode;
+		$(parent).find(".tab-settings").animate({width: 'toggle'});
+	}
+</script>

@@ -1,0 +1,29 @@
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
+     data-toggle="tooltip" data-placement="top" title="Before separator date">
+	<label class="mdl-textfield__label" for="kpia">KPI A (%)</label>
+	<input class="mdl-textfield__input" id="kpia" type="number" value="2"/>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
+     data-toggle="tooltip" data-placement="top" title="After separator date">
+	<label class="mdl-textfield__label" for="kpib">KPI B (%)</label>
+	<input class="mdl-textfield__input" id="kpib" type="number" value="5"/>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
+     data-toggle="tooltip" data-placement="top" title="e.g.: vn,us,th">
+	<label class="mdl-textfield__label" for="countries">Countries</label>
+	<input class="mdl-textfield__input" id="countries" type="text"/>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
+     data-toggle="tooltip" data-placement="top" title="e.g.: vn,us,th">
+	<label class="mdl-textfield__label" for="countriesex">Countries exclude</label>
+	<input class="mdl-textfield__input" id="countriesex" type="text"/>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+	<label class="mdl-textfield__label" for="absep">A|B separator date</label>
+	<input class="mdl-textfield__input" id="absep" type="date" value="2018-01-01"/>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+	<label class="mdl-textfield__label" for="until">Goal date</label>
+	<input class="mdl-textfield__input" id="until" type="date" value="2018-04-01"/>
+</div>
+<button class="mdl-button mdl-button--colored update-settings" onclick="kpiTrackUpdate()">Update settings</button>
