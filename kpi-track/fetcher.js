@@ -18,6 +18,12 @@ function kpiTrackUpdate()
 	}));
 	http.onreadystatechange = function ()
 	{
-		console.log(http.responseText);
+		if (http.readyState == 4 && http.status == 200)
+		{
+			if (http.responseText)
+			{
+				console.log(JSON.parse(http.responseText));
+			}
+		}
 	};
 }

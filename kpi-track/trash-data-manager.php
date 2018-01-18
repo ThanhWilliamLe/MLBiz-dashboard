@@ -16,7 +16,8 @@ function giveData($database)
 	$countriesEx = $received['ctx'];
 	$separator = $received['sep'];
 	$until = $received['til'];
-	echo data($database, $countries, $countriesEx, $separator, $until);
+	$result = data($database, $countries, $countriesEx, $separator, $until);
+	echo $result;
 }
 
 function checkDataFile()
