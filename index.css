@@ -124,3 +124,22 @@ body
 	overflow: auto;
 	overflow-y: scroll;
 }
+
+.tab-content .row
+{
+	padding-left: 1em;
+	padding-right: 1em;
+}
+
+.tab-content .row .card-block
+{
+	padding-bottom: 0.5em;
+	height: auto;
+}
+
+.tab-content .row .card-block .none
+{
+	display: none;
+	height: 0;
+	line-height: 0;
+}
