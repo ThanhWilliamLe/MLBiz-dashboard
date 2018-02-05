@@ -18,8 +18,12 @@
 	<script src="//storage.googleapis.com/code.getmdl.io/1.0.1/material.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
 	<script src="https://www.w3schools.com/lib/w3.js"></script>
 	<script src="kpi-track/fetcher.js"></script>
+	<script src="kpi-track/processor.js"></script>
 	<script src="kpi-track/cards.js"></script>
 </head>
 <body style="background-color: white">
@@ -31,7 +35,7 @@
 </div>
 <div id="tabbuttons">
 	<button class="mdl-button mdl-button--colored" onclick='$("#top, #top *").slideToggle()'>Toggle top</button>
-	<button class="mdl-button mdl-button--colored" onclick="openTab(this, 'kpi')">KPI tracking</button>
+	<button class="mdl-button mdl-button--colored" onclick="openTab(this, 'kpi')">Premium KPI tracking</button>
 </div>
 <div id="tabs">
 	<div class="tab-holder" id="tab-kpi">
@@ -60,7 +64,6 @@
 		$('[data-toggle="tooltip"]').tooltip();
 
 		kpiTrackUpdate();
-		generateCards();
 	}
 
 	function openTab(thisButton, name)

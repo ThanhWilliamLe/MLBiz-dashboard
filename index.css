@@ -127,19 +127,44 @@ body
 
 .tab-content .row
 {
-	padding-left: 1em;
-	padding-right: 1em;
+	padding: 0 1em;
+}
+
+.tab-content .row [class*=col-]
+{
+	height: auto;
+	padding: 0.2em;
+}
+
+.tab-content .row .card
+{
+	height: 100%;
+	padding: 1em 0;
+	border-radius: 0.25rem;
 }
 
 .tab-content .row .card-block
 {
-	padding-bottom: 0.5em;
-	height: auto;
+	padding: 0;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+}
+
+.tab-content .row .card-block > *
+{
+	margin: 0.15em;
 }
 
 .tab-content .row .card-block .none
 {
 	display: none;
-	height: 0;
-	line-height: 0;
+}
+
+.tab-content .row .card-block .progress
+{
+	height: 1.2em;
+	width: 75%;
+	margin: auto;
 }

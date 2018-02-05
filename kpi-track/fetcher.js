@@ -3,13 +3,8 @@ var startedQuery = false;
 
 function kpiTrackUpdate()
 {
-	var kpia = $("#tab-kpi #kpia").val();
-	var kpib = $("#tab-kpi #kpib").val();
-	var countries = $("#tab-kpi #countries").val();
-	var countriesEx = $("#tab-kpi #countriesex").val();
-	var separator = $("#tab-kpi #absep").val();
-	var until = $("#tab-kpi #until").val();
-
+	startedQuery = false;
+	generateCards();
 	fetchSessionAndStartQuery();
 }
 
@@ -47,7 +42,26 @@ function fetchSessionAndStartQuery()
 	}));
 }
 
-function doQuery(session, card, type, query)
+function startQuerying(session)
+{
+	if (startedQuery) return;
+	startedQuery = true;
+	var queryings = {};
+
+	var cards = $("#container-cards").find(".card-block");
+	cards.each(function (id)
+	{
+		var card = cards[id];
+		var query = $(card).find('.card-query')[0].innerHTML;
+		var type = $(card).find('.card-type')[0].innerHTML;
+		var func = $(card).find('.card-function')[0].innerHTML;
+		//$(card).find('.none').remove();
+		if (type == 'query' && query.length > 0) doQuery(queryings, session, card, query, func);
+		else processCard(card, type, func, query);
+	});
+}
+
+function doQuery(queryings, session, card, query, func)
 {
 	var http = new XMLHttpRequest();
 	http.open('POST', 'https://bi.moneylover.me/api/dataset', true);
@@ -55,7 +69,7 @@ function doQuery(session, card, type, query)
 	http.setRequestHeader("X-Metabase-Session", session);
 	http.onreadystatechange = function ()
 	{
-		if (http.readyState == 4 && http.status == 200) finishedQuery(card, http.responseText, type);
+		if (http.readyState == 4 && http.status == 200) doneQuery(queryings, card, http.responseText, func);
 	}
 	var payload =
 		{
@@ -63,31 +77,9 @@ function doQuery(session, card, type, query)
 			type: "native",
 			native:
 				{
-					query: query
+					query: decodeURIComponent(query)
 				}
 		}
 	http.send(JSON.stringify(payload));
-}
-
-function startQuerying(session)
-{
-	if (startedQuery) return;
-	startedQuery = true;
-
-	var cards = $("#container-cards").find(".card-block");
-	cards.each(function (id)
-	{
-		var card = cards[id];
-		var query = $(card).find('.card-query')[0].innerHTML;
-		var type = $(card).find('.card-display')[0].innerHTML;
-		$(card).find('.none').remove();
-		doQuery(session, card, type, query);
-	});
-}
-
-function finishedQuery(card, result, type)
-{
-	$(card).find('.fa-spinner').remove();
-	var data = JSON.parse(result).data;
-	
+	queryings[card.id] = true;
 }
