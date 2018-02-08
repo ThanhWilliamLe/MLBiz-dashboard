@@ -15,14 +15,3 @@ if ($json != null && count($json) > 0)
 		echo $session;
 	}
 }
-
-$filesize = filesize("saved-session.txt");
-if ($filesize > 0)
-{
-	$sessionTxt = fopen("saved-session.txt", "r");
-	echo fread($sessionTxt, $filesize);
-	fclose($sessionTxt);
-} else
-{
-	echo 'no saved session';
-}

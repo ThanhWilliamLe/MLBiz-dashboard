@@ -1,3 +1,4 @@
+<button class="mdl-button mdl-button--colored display-toggle" onclick="displayToggle()">Toggle display</button>
 <div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
      data-toggle="tooltip" data-placement="top" title="Before separator date">
 	<label class="mdl-textfield__label" for="kpia">KPI A (%)</label>
@@ -27,8 +28,8 @@
 	<input class="mdl-textfield__input" id="until" type="date" value="2018-04-01"/>
 </div>
 <div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
-     data-toggle="tooltip" data-placement="top" title="e.g.: 14 means using 14 days of historical data to estimate future value">
-	<label class="mdl-textfield__label" for="avgperiod">Estimation history span</label>
+     data-toggle="tooltip" data-placement="top" title="e.g.: 14 means using 14 days of historical data to calculate average and estimate future value">
+	<label class="mdl-textfield__label" for="avgperiod">Average history span</label>
 	<input class="mdl-textfield__input" id="avgperiod" type="number" value="14"/>
 </div>
 <button class="mdl-button mdl-button--colored update-settings" onclick="kpiTrackUpdate()">Update settings</button>

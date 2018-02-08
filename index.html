@@ -15,6 +15,7 @@
 
 	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 	<script src="//storage.googleapis.com/code.getmdl.io/1.0.1/material.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"></script>
@@ -45,7 +46,11 @@
 			</button>
 			<div class="tab-settings" w3-include-html="kpi-track/settings.html"></div>
 			<div class="tab-content">
-				<div id="container-cards" class="container-fluid" style="padding-top: 1em">
+				<div id="container">
+					<div id="container-cards-A" class="container-fluid" style="padding-top: 1em">
+					</div>
+					<div id="container-cards-B" class="container-fluid" style="padding-top: 1em">
+					</div>
 				</div>
 			</div>
 		</div>
@@ -55,6 +60,13 @@
 </html>
 
 <script>
+	String.prototype.replaceAt = function (index, char)
+	{
+		var a = this.split("");
+		a[index] = char;
+		return a.join("");
+	}
+
 	w3.includeHTML(initPage);
 
 	function initPage()
@@ -63,7 +75,16 @@
 		$(".tab-setting-toggle").click();
 		$('[data-toggle="tooltip"]').tooltip();
 
+		initTabs();
+	}
+
+	function initTabs()
+	{
+		// Tab kpi track
+		if (Cookies.get('premium-kpi-track') == null) saveSettingCookies();
+		loadSettingCookies();
 		kpiTrackUpdate();
+		$(".display-toggle").click();
 	}
 
 	function openTab(thisButton, name)

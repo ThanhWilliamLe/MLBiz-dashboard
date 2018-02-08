@@ -6,8 +6,16 @@ function getValueOfCard(cardId)
 	return value;
 }
 
+function cardTitlePopup(cardId, popup)
+{
+	var title = $('#' + cardId).find('.card-title')[0];
+	var inner = title.innerHTML + ' <span class="fa fa-question-circle" data-toggle="tooltip" data-placement="bottom" title="' + popup + '"></span>';
+	title.innerHTML = inner;
+}
+
 function doneQuery(queryings, card, result, func)
 {
+	$(card).find('.query-spinner')[0].remove();
 	var data = JSON.parse(result).data;
 	var child = processCard(card, "query", func, data, true);
 	$(card).append(child);
@@ -33,8 +41,8 @@ function finishedQueries()
 	var kpib = $("#tab-kpi #kpib").val();
 	var daysLeft = moment.duration(moment($("#tab-kpi #until").val()).diff(moment($("#tab-kpi #absep").val()))).asDays();
 
-	var usersA = getValueOfCard('usersA');
-	var usersApre = getValueOfCard('usersApre');
+	var usersA = getValueOfCard('usersAZ');
+	var usersApre = getValueOfCard('usersAZpre');
 	var usersAtoPre = Math.ceil(usersA * kpia / 100);
 	var usersAA = getValueOfCard('usersAA');
 	var usersAApre = getValueOfCard('usersAApre');
@@ -55,8 +63,8 @@ function finishedQueries()
 	var usersAOspeedNeed = Math.round((usersAOtoPre - usersAOpre) / daysLeft);
 	var usersAOfuturePre = usersAOpre + usersAOspeed * daysLeft;
 
-	var usersB = getValueOfCard('usersB');
-	var usersBpre = getValueOfCard('usersBpre');
+	var usersB = getValueOfCard('usersBZ');
+	var usersBpre = getValueOfCard('usersBZpre');
 	var usersBtoPre = Math.ceil(usersB * kpib / 100);
 	var usersBA = getValueOfCard('usersBA');
 	var usersBApre = getValueOfCard('usersBApre');
@@ -77,45 +85,51 @@ function finishedQueries()
 	var usersBOspeedNeed = Math.round((usersBOtoPre - usersBOpre) / daysLeft);
 	var usersBOfuturePre = usersBOpre + usersBOspeed * daysLeft;
 
-	$("#usersAtoPre").append(queryDisplayAuto(usersAtoPre));
-	$("#usersApre").append(queryDisplayAuto([usersApre, usersAtoPre]));
+	$("#usersAZtoPre").append(queryDisplayAuto(usersAtoPre));
+	$("#usersAZpre").append(queryDisplayAuto([usersApre, usersAtoPre]));
 	$("#usersAAtoPre").append(queryDisplayAuto(usersAAtoPre));
 	$("#usersAApre").append(queryDisplayAuto([usersAApre, usersAAtoPre]));
 	//$("#usersAAspeed").append(queryDisplayAuto([usersAAspeed, usersAAspeedNeed]));
 	$("#usersAAspeedNeed").append(queryDisplayAuto(usersAAspeedNeed));
+	cardTitlePopup("usersAAfuturePre", "Speed " + usersAAspeed + "/" + usersAAspeedNeed + " Required");
 	$("#usersAAfuturePre").append(queryDisplayAuto(usersAAfuturePre));
 	$("#usersAAfuturePre").append(queryDisplayAuto([usersAAfuturePre, usersAAtoPre]));
 	$("#usersAItoPre").append(queryDisplayAuto(usersAItoPre));
 	$("#usersAIpre").append(queryDisplayAuto([usersAIpre, usersAItoPre]));
 	//$("#usersAIspeed").append(queryDisplayAuto([usersAIspeed, usersAIspeedNeed]));
 	$("#usersAIspeedNeed").append(queryDisplayAuto(usersAIspeedNeed));
+	cardTitlePopup("usersAIfuturePre", "Speed " + usersAIspeed + "/" + usersAIspeedNeed + " Required");
 	$("#usersAIfuturePre").append(queryDisplayAuto(usersAIfuturePre));
 	$("#usersAIfuturePre").append(queryDisplayAuto([usersAIfuturePre, usersAItoPre]));
 	$("#usersAOtoPre").append(queryDisplayAuto(usersAOtoPre));
 	$("#usersAOpre").append(queryDisplayAuto([usersAOpre, usersAOtoPre]));
 	//$("#usersAOspeed").append(queryDisplayAuto([usersAOspeed, usersAOspeedNeed]));
 	$("#usersAOspeedNeed").append(queryDisplayAuto(usersAOspeedNeed));
+	cardTitlePopup("usersAOfuturePre", "Speed " + usersAOspeed + "/" + usersAOspeedNeed + " Required");
 	$("#usersAOfuturePre").append(queryDisplayAuto(usersAOfuturePre));
 	$("#usersAOfuturePre").append(queryDisplayAuto([usersAOfuturePre, usersAOtoPre]));
 
-	$("#usersBtoPre").append(queryDisplayAuto(usersBtoPre));
-	$("#usersBpre").append(queryDisplayAuto([usersBpre, usersBtoPre]));
+	$("#usersBZtoPre").append(queryDisplayAuto(usersBtoPre));
+	$("#usersBZpre").append(queryDisplayAuto([usersBpre, usersBtoPre]));
 	$("#usersBAtoPre").append(queryDisplayAuto(usersBAtoPre));
 	$("#usersBApre").append(queryDisplayAuto([usersBApre, usersBAtoPre]));
 	//$("#usersBAspeed").append(queryDisplayAuto([usersBAspeed, usersBAspeedNeed]));
 	$("#usersBAspeedNeed").append(queryDisplayAuto(usersBAspeedNeed));
+	cardTitlePopup("usersBAfuturePre", "Speed " + usersBAspeed + "/" + usersBAspeedNeed + " Required");
 	$("#usersBAfuturePre").append(queryDisplayAuto(usersBAfuturePre));
 	$("#usersBAfuturePre").append(queryDisplayAuto([usersBAfuturePre, usersBAtoPre]));
 	$("#usersBItoPre").append(queryDisplayAuto(usersBItoPre));
 	$("#usersBIpre").append(queryDisplayAuto([usersBIpre, usersBItoPre]));
 	//$("#usersBIspeed").append(queryDisplayAuto([usersBIspeed, usersBIspeedNeed]));
 	$("#usersBIspeedNeed").append(queryDisplayAuto(usersBIspeedNeed));
+	cardTitlePopup("usersBIfuturePre", "Speed " + usersBIspeed + "/" + usersBIspeedNeed + " Required");
 	$("#usersBIfuturePre").append(queryDisplayAuto(usersBIfuturePre));
 	$("#usersBIfuturePre").append(queryDisplayAuto([usersBIfuturePre, usersBItoPre]));
 	$("#usersBOtoPre").append(queryDisplayAuto(usersBOtoPre));
 	$("#usersBOpre").append(queryDisplayAuto([usersBOpre, usersBOtoPre]));
 	//$("#usersBOspeed").append(queryDisplayAuto([usersBOspeed, usersBOspeedNeed]));
 	$("#usersBOspeedNeed").append(queryDisplayAuto(usersBOspeedNeed));
+	cardTitlePopup("usersBOfuturePre", "Speed " + usersBOspeed + "/" + usersBOspeedNeed + " Required");
 	$("#usersBOfuturePre").append(queryDisplayAuto(usersBOfuturePre));
 	$("#usersBOfuturePre").append(queryDisplayAuto([usersBOfuturePre, usersBOtoPre]));
 
@@ -207,7 +221,7 @@ function calculateRecentSum(history, daysToTakeAvg, func)
 		return row[0];
 	};
 	var futureSumTotal = 0;
-	for (var i = history.length - daysToTakeAvg - 1; i < history.length - 1; i++)
+	for (var i = Math.max(0, history.length - daysToTakeAvg - 1); i < history.length - 1; i++)
 	{
 		futureSumTotal += func(history[i]);
 	}
