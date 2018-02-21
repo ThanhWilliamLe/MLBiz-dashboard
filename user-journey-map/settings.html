@@ -1,0 +1,42 @@
+<button class="mdl-button mdl-button--colored display-toggle" onclick="displayToggle()">Toggle display</button>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
+     data-toggle="tooltip" data-placement="top" title="Before separator date">
+	<label class="mdl-textfield__label" for="kpia">KPI A (%)</label>
+	<input class="mdl-textfield__input" id="kpia" type="number" step=".01" value="2"/>
+	<div class="none prev-value"></div>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
+     data-toggle="tooltip" data-placement="top" title="After separator date">
+	<label class="mdl-textfield__label" for="kpib">KPI B (%)</label>
+	<input class="mdl-textfield__input" id="kpib" type="number" step=".01" value="5"/>
+	<div class="none prev-value"></div>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
+     data-toggle="tooltip" data-placement="top" title="e.g.: vn,us,th">
+	<label class="mdl-textfield__label" for="countries">Countries</label>
+	<input class="mdl-textfield__input" id="countries" type="text"/>
+	<div class="none prev-value"></div>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
+     data-toggle="tooltip" data-placement="top" title="e.g.: vn,us,th">
+	<label class="mdl-textfield__label" for="countriesex">Countries exclude</label>
+	<input class="mdl-textfield__input" id="countriesex" type="text"/>
+	<div class="none prev-value"></div>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+	<label class="mdl-textfield__label" for="absep">A|B separator date</label>
+	<input class="mdl-textfield__input" id="absep" type="date" value="2018-01-01"/>
+	<div class="none prev-value"></div>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+	<label class="mdl-textfield__label" for="until">Goal date</label>
+	<input class="mdl-textfield__input" id="until" type="date" value="2018-04-01"/>
+	<div class="none prev-value"></div>
+</div>
+<div class="tab-settings-row mdl-textfield mdl-js-textfield mdl-textfield--floating-label"
+     data-toggle="tooltip" data-placement="top" title="e.g.: 14 means using 14 days of historical data to calculate average and estimate future value">
+	<label class="mdl-textfield__label" for="avgperiod">Average history span</label>
+	<input class="mdl-textfield__input" id="avgperiod" type="number" value="14"/>
+	<div class="none prev-value"></div>
+</div>
+<button class="mdl-button mdl-button--colored update-settings" onclick="kpiTrackUpdate()">Update settings</button>

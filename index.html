@@ -4,6 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<title>ML Biz</title>
+
 	<link rel="icon" type="image/png" href="favicon.png">
 	<link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
 	<link rel="stylesheet" href="//storage.googleapis.com/code.getmdl.io/1.0.1/material.green-cyan.min.css"/>
@@ -11,7 +12,6 @@
 	      href='https://fonts.googleapis.com/css?family=Roboto:700,700italic,500,400,400italic,300,300italic'>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-	<link rel="stylesheet" href="index.css">
 
 	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
@@ -23,9 +23,16 @@
 	<script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
 	<script src="https://www.w3schools.com/lib/w3.js"></script>
-	<script src="kpi-track/fetcher.js"></script>
-	<script src="kpi-track/processor.js"></script>
-	<script src="kpi-track/cards.js"></script>
+	<script src="https://apis.google.com/js/api.js"></script>
+
+	<link rel="stylesheet" href="index.css">
+
+	<link rel="stylesheet" href="premium-kpi-track/style.css">
+	<script src="premium-kpi-track/fetcher.js"></script>
+	<script src="premium-kpi-track/processor.js"></script>
+	<script src="premium-kpi-track/cards.js"></script>
+
+	<script src="user-journey-map/loader.js"></script>
 </head>
 <body style="background-color: white">
 <div id="top">
@@ -36,23 +43,26 @@
 </div>
 <div id="tabbuttons">
 	<button class="mdl-button mdl-button--colored" onclick='$("#top, #top *").slideToggle()'>Toggle top</button>
-	<button class="mdl-button mdl-button--colored" onclick="openTab(this, 'kpi')">Premium KPI tracking</button>
+	<button class="mdl-button mdl-button--colored" onclick="openTab(this, 'premium-kpi')">Premium KPI tracking</button>
+	<button class="mdl-button mdl-button--colored" onclick="openTab(this, 'user-journey')">User journey map</button>
 </div>
 <div id="tabs">
-	<div class="tab-holder" id="tab-kpi">
+	<div class="tab-holder" id="tab-premium-kpi">
 		<div class="tab">
 			<button class="mdl-button mdl-button--colored tab-setting-toggle" onclick="openSettingDiv(this)">
 				<div>Settings</div>
 			</button>
-			<div class="tab-settings" w3-include-html="kpi-track/settings.html"></div>
-			<div class="tab-content">
-				<div id="container">
-					<div id="container-cards-A" class="container-fluid" style="padding-top: 1em">
-					</div>
-					<div id="container-cards-B" class="container-fluid" style="padding-top: 1em">
-					</div>
-				</div>
-			</div>
+			<div class="tab-settings" w3-include-html="premium-kpi-track/settings.html"></div>
+			<div class="tab-content" w3-include-html="premium-kpi-track/content.html"></div>
+		</div>
+	</div>
+	<div class="tab-holder" id="tab-user-journey">
+		<div class="tab">
+			<button class="mdl-button mdl-button--colored tab-setting-toggle" onclick="openSettingDiv(this)">
+				<div>Settings</div>
+			</button>
+			<div class="tab-settings" w3-include-html="user-journey-map/settings.html"></div>
+			<div class="tab-content" w3-include-html="user-journey-map/content.html"></div>
 		</div>
 	</div>
 </div>
@@ -80,11 +90,8 @@
 
 	function initTabs()
 	{
-		// Tab kpi track
-		if (Cookies.get('premium-kpi-track') == null) saveSettingCookies();
-		loadSettingCookies();
-		kpiTrackUpdate();
-		$(".display-toggle").click();
+		premiumKpiTrackInit();
+		userJourneyMapInit();
 	}
 
 	function openTab(thisButton, name)

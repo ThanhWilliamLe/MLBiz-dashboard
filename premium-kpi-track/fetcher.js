@@ -1,43 +1,105 @@
 var MLDBID = 2;
 var startedQuery = false;
 
+function premiumKpiTrackInit()
+{
+	if (Cookies.get('premium-kpi-track') == null) saveSettingCookies();
+	loadSettingCookies();
+	kpiTrackUpdate();
+	//$(".display-toggle").click();
+}
+
 function kpiTrackUpdate()
 {
+	var justRecalculate = checkJustNeedRecalculate();
+	setNewSettingValues();
 	saveSettingCookies();
-	startedQuery = false;
-	generateCards();
-	fetchSessionAndStartQuery();
+	if (!justRecalculate)
+	{
+		startedQuery = false;
+		generateCards();
+		fetchSessionAndStartQuery();
+	}
+	else
+	{
+		recalculate();
+	}
+}
+
+function checkJustNeedRecalculate()
+{
+	var ctold = $("#tab-premium-kpi #countries").next(".prev-value").html();
+	var ct = $("#tab-premium-kpi #countries").val();
+	var ctexold = $("#tab-premium-kpi #countriesex").next(".prev-value").html();
+	var ctex = $("#tab-premium-kpi #countriesex").val();
+	var sepold = $("#tab-premium-kpi #absep").next(".prev-value").html();
+	var sep = $("#tab-premium-kpi #absep").val();
+	var tilold = $("#tab-premium-kpi #until").next(".prev-value").html();
+	var til = $("#tab-premium-kpi #until").val();
+	if (ct != ctold || ctex != ctexold || sep != sepold || til != tilold) return false;
+	return true;
+}
+
+function setNewSettingValues()
+{
+	var kpiaprev = $("#tab-premium-kpi #kpia").next(".prev-value");
+	var kpia = $("#tab-premium-kpi #kpia");
+	kpiaprev.html(kpia.val());
+
+	var kpibprev = $("#tab-premium-kpi #kpib").next(".prev-value");
+	var kpib = $("#tab-premium-kpi #kpib");
+	kpibprev.html(kpib.val());
+
+	var ctprev = $("#tab-premium-kpi #countries").next(".prev-value");
+	var ct = $("#tab-premium-kpi #countries");
+	ctprev.html(ct.val());
+
+	var ctexprev = $("#tab-premium-kpi #countriesex").next(".prev-value");
+	var ctex = $("#tab-premium-kpi #countriesex");
+	ctexprev.html(ctex.val());
+
+	var sepprev = $("#tab-premium-kpi #absep").next(".prev-value");
+	var sep = $("#tab-premium-kpi #absep");
+	sepprev.html(sep.val());
+
+	var tilprev = $("#tab-premium-kpi #until").next(".prev-value");
+	var til = $("#tab-premium-kpi #until");
+	tilprev.html(til.val());
+
+	var avgprev = $("#tab-premium-kpi #avgperiod").next(".prev-value");
+	var avg = $("#tab-premium-kpi #avgperiod");
+	avgprev.html(avg.val());
 }
 
 function loadSettingCookies()
 {
 	var cookies = JSON.parse(Cookies.get('premium-kpi-track'));
-	$("#tab-kpi #kpia").val(cookies.kpia);
-	$("#tab-kpi #kpib").val(cookies.kpib);
-	$("#tab-kpi #countries").val(cookies.ct);
-	$("#tab-kpi #countriesex").val(cookies.ctex);
-	$("#tab-kpi #absep").val(cookies.sep);
-	$("#tab-kpi #until").val(cookies.til);
-	$("#tab-kpi #avgperiod").val(cookies.his);
+	$("#tab-premium-kpi #kpia").val(cookies.kpia);
+	$("#tab-premium-kpi #kpib").val(cookies.kpib);
+	$("#tab-premium-kpi #countries").val(cookies.ct);
+	$("#tab-premium-kpi #countriesex").val(cookies.ctex);
+	$("#tab-premium-kpi #absep").val(cookies.sep);
+	$("#tab-premium-kpi #until").val(cookies.til);
+	$("#tab-premium-kpi #avgperiod").val(cookies.his);
 }
 
 function saveSettingCookies()
 {
 	Cookies.set('premium-kpi-track', JSON.stringify({
-		kpia: $("#tab-kpi #kpia").val(),
-		kpib: $("#tab-kpi #kpib").val(),
-		ct: $("#tab-kpi #countries").val(),
-		ctex: $("#tab-kpi #countriesex").val(),
-		sep: $("#tab-kpi #absep").val(),
-		til: $("#tab-kpi #until").val(),
-		his: $("#tab-kpi #avgperiod").val()
+		kpia: $("#tab-premium-kpi #kpia").val(),
+		kpib: $("#tab-premium-kpi #kpib").val(),
+		ct: $("#tab-premium-kpi #countries").val(),
+		ctex: $("#tab-premium-kpi #countriesex").val(),
+		sep: $("#tab-premium-kpi #absep").val(),
+		til: $("#tab-premium-kpi #until").val(),
+		his: $("#tab-premium-kpi #avgperiod").val()
 	}));
 }
 
 function fetchSessionAndStartQuery()
 {
 	var xhrOldSession = new XMLHttpRequest();
-	xhrOldSession.open('GET', './kpi-track/saved-session.txt', true);
+	xhrOldSession.open('GET', './premium-kpi-track/saved-session.txt', true);
 	xhrOldSession.onreadystatechange = function ()
 	{
 		if (xhrOldSession.readyState == 4 && xhrOldSession.status == 200)
@@ -62,7 +124,7 @@ function fetchSessionAndStartQuery()
 							{
 								session = JSON.parse(xhrNewSession.responseText).id;
 								startQuerying(session);
-								xhrOldSession.open('POST', './kpi-track/session.php', true);
+								xhrOldSession.open('POST', './premium-kpi-track/session.php', true);
 								xhrOldSession.send(JSON.stringify({session: session}));
 							}
 						}
@@ -116,7 +178,7 @@ function startQuerying(session)
 	startedQuery = true;
 	var queryings = {};
 
-	var cards = $("#container").find(".card-block");
+	var cards = $("#tab-premium-kpi #container").find(".card-block");
 	cards.each(function (id)
 	{
 		var card = cards[id];

@@ -15,18 +15,42 @@ function cardTitlePopup(cardId, popup)
 
 function doneQuery(queryings, card, result, func)
 {
-	$(card).find('.query-spinner')[0].remove();
+	$(card).find('.query-spinner').remove();
+
 	var data = JSON.parse(result).data;
+	$(card).append('<span class="none card-data">' + JSON.stringify(data) + '</span>');
+
 	var child = processCard(card, "query", func, data, true);
 	$(card).append(child);
+
 	delete queryings[card.id];
 	if (Object.keys(queryings).length == 0) finishedQueries();
+}
+
+function recalculate()
+{
+	$("#tab-premium-kpi .calculation").remove();
+	var cards = $("#tab-premium-kpi #container").find(".card-block");
+	cards.each(function (id)
+	{
+		var card = cards[id];
+		$(card).find(".fa-question-circle").remove();
+		var data = $(card).find('.card-data');
+		if (data != null && data[0] != null)
+		{
+			data = JSON.parse(data[0].innerHTML);
+			var type = $(card).find('.card-type')[0].innerHTML;
+			var func = $(card).find('.card-function')[0].innerHTML;
+			$(card).append(processCard(card, type, func, data, false));
+		}
+	});
+	finishedQueries();
 }
 
 function processCard(card, type, func, data, postQuery)
 {
 	var result = "";
-	if (postQuery && data.cols.length == 1 && data.rows.length == 1) result = queryDisplayAuto(data.rows[0]);
+	if (postQuery && data.cols.length == 1 && data.rows.length == 1) result = queryDisplayAuto(data.rows[0], false);
 	if (func != null && func.length > 0)
 	{
 		result = window["cardFunc_" + func](card, data, result);
@@ -37,9 +61,10 @@ function processCard(card, type, func, data, postQuery)
 function finishedQueries()
 {
 	$('.query-spinner').remove();
-	var kpia = $("#tab-kpi #kpia").val();
-	var kpib = $("#tab-kpi #kpib").val();
-	var daysLeft = moment.duration(moment($("#tab-kpi #until").val()).diff(moment($("#tab-kpi #absep").val()))).asDays();
+
+	var kpia = $("#tab-premium-kpi #kpia").val();
+	var kpib = $("#tab-premium-kpi #kpib").val();
+	var daysLeft = moment.duration(moment($("#tab-premium-kpi #until").val()).diff(moment($("#tab-premium-kpi #absep").val()))).asDays();
 
 	var usersA = getValueOfCard('usersAZ');
 	var usersApre = getValueOfCard('usersAZpre');
@@ -48,19 +73,19 @@ function finishedQueries()
 	var usersAApre = getValueOfCard('usersAApre');
 	var usersAAtoPre = Math.ceil(usersAA * kpia / 100);
 	var usersAAspeed = getValueOfCard('usersAAspeed');
-	var usersAAspeedNeed = Math.round((usersAAtoPre - usersAApre) / daysLeft);
+	var usersAAspeedNeed = Math.max(0,Math.round((usersAAtoPre - usersAApre) / daysLeft));
 	var usersAAfuturePre = usersAApre + usersAAspeed * daysLeft;
 	var usersAI = getValueOfCard('usersAI');
 	var usersAIpre = getValueOfCard('usersAIpre');
 	var usersAItoPre = Math.ceil(usersAI * kpia / 100);
 	var usersAIspeed = getValueOfCard('usersAIspeed');
-	var usersAIspeedNeed = Math.round((usersAItoPre - usersAIpre) / daysLeft);
+	var usersAIspeedNeed = Math.max(0,Math.round((usersAItoPre - usersAIpre) / daysLeft));
 	var usersAIfuturePre = usersAIpre + usersAIspeed * daysLeft;
 	var usersAO = getValueOfCard('usersAO');
 	var usersAOpre = getValueOfCard('usersAOpre');
 	var usersAOtoPre = Math.ceil(usersAO * kpia / 100);
 	var usersAOspeed = getValueOfCard('usersAOspeed');
-	var usersAOspeedNeed = Math.round((usersAOtoPre - usersAOpre) / daysLeft);
+	var usersAOspeedNeed = Math.max(0,Math.round((usersAOtoPre - usersAOpre) / daysLeft));
 	var usersAOfuturePre = usersAOpre + usersAOspeed * daysLeft;
 
 	var usersB = getValueOfCard('usersBZ');
@@ -70,19 +95,19 @@ function finishedQueries()
 	var usersBApre = getValueOfCard('usersBApre');
 	var usersBAtoPre = Math.ceil(usersBA * kpib / 100);
 	var usersBAspeed = getValueOfCard('usersBAspeed');
-	var usersBAspeedNeed = Math.round((usersBAtoPre - usersBApre) / daysLeft);
+	var usersBAspeedNeed = Math.max(0,Math.round((usersBAtoPre - usersBApre) / daysLeft));
 	var usersBAfuturePre = usersBApre + usersBAspeed * daysLeft;
 	var usersBI = getValueOfCard('usersBI');
 	var usersBIpre = getValueOfCard('usersBIpre');
 	var usersBItoPre = Math.ceil(usersBI * kpib / 100);
 	var usersBIspeed = getValueOfCard('usersBIspeed');
-	var usersBIspeedNeed = Math.round((usersBItoPre - usersBIpre) / daysLeft);
+	var usersBIspeedNeed = Math.max(0,Math.round((usersBItoPre - usersBIpre) / daysLeft));
 	var usersBIfuturePre = usersBIpre + usersBIspeed * daysLeft;
 	var usersBO = getValueOfCard('usersBO');
 	var usersBOpre = getValueOfCard('usersBOpre');
 	var usersBOtoPre = Math.ceil(usersBO * kpib / 100);
 	var usersBOspeed = getValueOfCard('usersBOspeed');
-	var usersBOspeedNeed = Math.round((usersBOtoPre - usersBOpre) / daysLeft);
+	var usersBOspeedNeed = Math.max(0,Math.round((usersBOtoPre - usersBOpre) / daysLeft));
 	var usersBOfuturePre = usersBOpre + usersBOspeed * daysLeft;
 
 	$("#usersAZtoPre").append(queryDisplayAuto(usersAtoPre));
@@ -133,35 +158,36 @@ function finishedQueries()
 	$("#usersBOfuturePre").append(queryDisplayAuto(usersBOfuturePre));
 	$("#usersBOfuturePre").append(queryDisplayAuto([usersBOfuturePre, usersBOtoPre]));
 
-	$('[data-toggle="tooltip"]').tooltip();
+	$('#tab-premium-kpi [data-toggle="tooltip"]').tooltip();
 }
 
-function queryDisplayAuto(value)
+function queryDisplayAuto(value, calc)
 {
+	if (calc == null) calc = true;
 	if (value.constructor === Array && value.length == 2)
 	{
-		return queryDisplayProgress(value[0], value[1]);
+		value = queryDisplayProgress(value[0], value[1], calc);
 	}
-	if (isNumber(value))
+	else if (isNumber(value))
 	{
 		value = numeral(value).format('0,0');
-		return queryDisplayBigText(value);
+		value = queryDisplayBigText(value, calc);
 	}
 	return value;
 }
 
-function queryDisplayBigText(value)
+function queryDisplayBigText(value, calc)
 {
-	return '<h2 class="card-value card-title">' + value + '</h2>';
+	return '<h2 class="card-value card-title ' + (calc ? 'calculation' : '') + '">' + value + '</h2>';
 }
 
-function queryDisplayProgress(progress, over)
+function queryDisplayProgress(progress, over, calc)
 {
 	var value = Math.round(progress * 100 / over);
 	var color = "bg-success";
 	if (value < 40) color = "bg-danger";
 	else if (value < 80) color = "bg-warning";
-	return '<div class="progress" data-toggle="tooltip" data-placement="bottom" title="' + progress + ' / ' + over + '">' +
+	return '<div class="progress ' + (calc ? 'calculation' : '') + '" data-toggle="tooltip" data-placement="bottom" title="' + progress + ' / ' + over + '">' +
 		'<div class="progress-bar ' + color + ' progress-bar-striped progress-bar-animated" role="progressbar" ' +
 		'style="width: ' + Math.min(100, value) + '%">' + value + '%' +
 		'</div></div>';
@@ -174,8 +200,8 @@ function isNumber(value)
 
 function cardFunc_futureUsers(card, data, preprocessed)
 {
-	var from = moment($("#tab-kpi #absep").val());
-	var to = moment($("#tab-kpi #until").val());
+	var from = moment($("#tab-premium-kpi #absep").val());
+	var to = moment($("#tab-premium-kpi #until").val());
 	var daysTilUntil = Infinity;
 	var value = -1;
 	var cummulativeUsers = 0;
@@ -191,7 +217,7 @@ function cardFunc_futureUsers(card, data, preprocessed)
 	});
 	if (value == -1)
 	{
-		var daysToTakeAvg = $("#tab-kpi #avgperiod").val();
+		var daysToTakeAvg = $("#tab-premium-kpi #avgperiod").val();
 		var speed = calculateAvgSpeed(data.rows, daysToTakeAvg, function (row)
 		{
 			return row[1]
@@ -204,7 +230,7 @@ function cardFunc_futureUsers(card, data, preprocessed)
 
 function cardFunc_estimateAvg(card, data, preprocessed)
 {
-	var daysToTakeAvg = $("#tab-kpi #avgperiod").val();
+	var daysToTakeAvg = $("#tab-premium-kpi #avgperiod").val();
 	var speed = calculateAvgSpeed(data.rows, daysToTakeAvg, null);
 	return queryDisplayAuto(speed);
 }

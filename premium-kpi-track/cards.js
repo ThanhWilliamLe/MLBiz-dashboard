@@ -2,12 +2,12 @@ function generateCards()
 {
 	$("#container-cards-A").find('*').remove();
 	$("#container-cards-B").find('*').remove();
-	var kpia = $("#tab-kpi #kpia").val();
-	var kpib = $("#tab-kpi #kpib").val();
-	var ct = $("#tab-kpi #countries").val();
-	var ctex = $("#tab-kpi #countriesex").val();
-	var sep = $("#tab-kpi #absep").val();
-	var til = $("#tab-kpi #until").val();
+	var kpia = $("#tab-premium-kpi #kpia").val();
+	var kpib = $("#tab-premium-kpi #kpib").val();
+	var ct = $("#tab-premium-kpi #countries").val();
+	var ctex = $("#tab-premium-kpi #countriesex").val();
+	var sep = $("#tab-premium-kpi #absep").val();
+	var til = $("#tab-premium-kpi #until").val();
 	var sepFormat = sep.substr(8, 2) + "/" + sep.substr(5, 2);
 	var tilFormat = til.substr(8, 2) + "/" + til.substr(5, 2);
 	var selectorA = selector(ct, ctex, null, sep);
@@ -212,10 +212,8 @@ function displayHover(card, isIn)
 
 			var allCards = $('#container .card').toArray();
 
-			console.log(title + "  " + regex1 + "  " + regex2);
 			allCards.forEach(function (card)
 			{
-				console.log(cardTitle(card) + "  " + regex1.test(cardTitle(card)) + "  " + regex2.test(cardTitle(card)) + "  " + (regex1.test(cardTitle(card)) | regex2.test(cardTitle(card))));
 				if (regex1.test(cardTitle(card)) | regex2.test(cardTitle(card))) cardsToLight.push(card);
 				else cardsToDim.push(card);
 			});
