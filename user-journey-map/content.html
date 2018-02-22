@@ -15,12 +15,17 @@
 			<h5 id="ujmProcessing"></h5>
 		</div>
 	</div>-->
-	<div id="ujmEventSelector">
-		<input class="mdl-textfield__input" id="ujmEventSelectorInput" type="text" />
+	<div id="ujmEventSelector" data-nodeid="-1">
+		<h6 id="ujmEventSelectorTitle" style="padding:0.5em; text-align: center">Set an event for node + $data-</h6>
+		<input class="mdl-textfield__input" id="ujmEventSelectorInput" type="text"/>
 		<div id="ujmEventSelectorList" class="scrollbar-dynamic"></div>
-		<button id="ujmEventSelectorRemove" class="mdl-button mdl-button--colored">Remove Node</button>
+		<button id="ujmEventSelectorClear" class="mdl-button mdl-button--colored" style="width: 100%">Clear node links
+		</button>
+		<button id="ujmEventSelectorRemove" class="mdl-button mdl-button--colored" style="width: 100%">Remove Node
+		</button>
+		<span id="ujmEventSelectorClose" class="fa fa-times" style="position: absolute; top:0.5em; right:1em;"></span>
 	</div>
 	<div id="ujmTheMap" class="none">
-
+		<canvas id="ujmMapCanvas"></canvas>
 	</div>
 </div>

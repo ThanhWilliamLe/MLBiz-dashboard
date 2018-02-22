@@ -1,4 +1,5 @@
 var ujmConfig = {};
+var ujmEventQuerySelector = '';
 
 function userJourneyMapInit()
 {
@@ -16,6 +17,7 @@ function ujmGetEvents(session)
 			ujmConfig.events = http.responseText.split(/\r?\n/);
 			ujmInitEventSelector();
 			ujmStartMapping();
+			//ujmGetStuffs(session);
 		}
 	}
 	http.send();
@@ -27,9 +29,10 @@ function ujmInitEventSelector()
 	{
 		var option = document.createElement("option");
 		option.innerHTML = event;
-		option.onclick = function(e)
+		option.onclick = function (e)
 		{
-			console.log(event);
+			ujmSetNodeEvent(event, $("#ujmEventSelector")[0].dataset.nodeid);
+			$("#ujmEventSelector").css('display', 'none')
 		}
 		$("#ujmEventSelectorList")[0].append(option);
 	});
@@ -50,6 +53,20 @@ function ujmInitEventSelector()
 			});
 		}
 	});
+	$("#ujmEventSelectorClear").click(function ()
+	{
+		ujmClearNodeLinks($("#ujmEventSelector")[0].dataset.nodeid);
+		$("#ujmEventSelector").css('display', 'none')
+	})
+	$("#ujmEventSelectorRemove").click(function ()
+	{
+		ujmSetNodeEvent("", $("#ujmEventSelector")[0].dataset.nodeid);
+		$("#ujmEventSelector").css('display', 'none')
+	})
+	$("#ujmEventSelectorClose").click(function ()
+	{
+		$("#ujmEventSelector").css('display', 'none');
+	});
 }
 
 function ujmStartMapping()
@@ -61,7 +78,7 @@ function ujmStartMapping()
 			cellsX: 10,
 			cellsY: 5
 		};
-
+	ujmInitCanvas();
 	for (var y = 0; y < ujmConfig.grid.cellsY; y++)
 	{
 		var gridRow = document.createElement("div");
@@ -71,7 +88,7 @@ function ujmStartMapping()
 		gridRow.style.width = "100%";
 		for (var x = 0; x < ujmConfig.grid.cellsX; x++)
 		{
-			var cellID = x + y * ujmConfig.grid.cellsX;
+			var cellID = x + y * ujmConfig.grid.cellsX + 1;
 			var gridCell = document.createElement("div");
 			gridCell.id = "ujmMapCell-" + cellID;
 			gridCell.classList.add("ujmMapCell");
@@ -80,11 +97,8 @@ function ujmStartMapping()
 
 			var cellNode = document.createElement("div");
 			cellNode.id = "ujmMapNode-" + cellID;
-			cellNode.classList.add("ujmMapNode");
-			cellNode['data-toggle'] = "tooltip";
-			cellNode['title'] = "Add an event node";
-			$(cellNode).tooltip();
-			cellNode.onclick = ujmNodeClick
+			ujmNodeEmpty(cellNode);
+			cellNode.onclick = ujmNodeClick;
 
 			gridCell.append(cellNode);
 			gridRow.append(gridCell);
@@ -93,14 +107,154 @@ function ujmStartMapping()
 	}
 }
 
+function ujmInitCanvas()
+{
+	var ctx = $("#ujmMapCanvas")[0].getContext('2d');
+	ctx.canvas.width = window.innerWidth;
+	ctx.canvas.height = window.innerHeight;
+	window.addEventListener('resize', function ()
+	{
+		ctx.canvas.width = window.innerWidth;
+		ctx.canvas.height = window.innerHeight;
+	});
+
+}
+
 function ujmNodeClick(event)
 {
-	console.log(ujmNodeId(event.path[0]));
+	var node = ujmGetNodeOfMouseEvent(event);
+	if (node == null) return;
+	var id = ujmNodeId(node);
+	$("#ujmEventSelector").css('display', 'flex');
+	$("#ujmEventSelector")[0].dataset.nodeid = id;
+	$("#ujmEventSelectorTitle").html("Set an event for node " + id);
+	if (ujmNodeEvent(node) != null) $("#ujmEventSelectorInput")[0].value = ujmNodeEvent(node);
+}
+
+function ujmGetNodeOfMouseEvent(event)
+{
+	for (var i = 0; i < event.path.length; i++)
+	{
+		if (event.path[i].classList.contains('ujmMapNode'))
+		{
+			return event.path[i];
+		}
+	}
+	return null;
+}
+
+function ujmNodeEmpty(node)
+{
+	clearClasses(node);
+	node.classList.add("ujmMapNode");
+	$(node).tooltip('dispose');
+	node['data-toggle'] = "tooltip";
+	node['title'] = "Add an event here";
+	$(node).tooltip();
+	node.innerHTML = ujmNodeId(node);
+	node.draggable = false;
+	node.ondrag = null;
+	node.ondragstart = null;
+	node.ondragover = null;
+	node.ondrop = null;
+}
+
+function ujmSetNodeEvent(event, nodeID)
+{
+	var node = $("#ujmMapNode-" + nodeID);
+	node[0].dataset.ujmEvent = event;
+	if (event == null || event == "")
+	{
+		ujmNodeEmpty(node[0]);
+	}
+	else
+	{
+		node.attr('data-original-title', 'Starting node');
+		node.html('<h6 class="ujmNodeEvent">' + event + '</h6>');
+		node[0].classList.add("ujmMapNode-start");
+		node[0].draggable = true;
+		node[0].ondragstart = function (ev)
+		{
+			ev.dataTransfer.setDragImage(document.createElement("none"), 0, 0);
+			ev.dataTransfer.dropEffect = "move";
+			ev.dataTransfer.setData("fromNode", nodeID);
+		}
+		var nodeBound = node[0].getBoundingClientRect();
+		var ctx = $("#ujmMapCanvas")[0].getContext('2d');
+		node[0].ondrag = function (ev)
+		{
+			requestAnimationFrame(function ()
+			{
+				ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+				ctx.beginPath();
+				ctx.setLineDash([5, 3]);
+				ctx.moveTo((nodeBound.left + nodeBound.right) / 2, (nodeBound.bottom + nodeBound.top) / 2);
+				ctx.lineTo(ev.x, ev.y);
+				ctx.lineWidth = 3;
+				ctx.strokeStyle = 'white';
+				ctx.stroke();
+			});
+		};
+		node[0].ondragend = function (ev)
+		{
+			requestAnimationFrame(function ()
+			{
+				ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+			});
+		};
+		node[0].ondragover = function (ev)
+		{
+			ev.preventDefault();
+		};
+		node[0].ondrop = function (ev)
+		{
+			ujmConnect(ev.dataTransfer.getData("fromNode"), nodeID);
+		}
+	}
+}
+
+function ujmConnect(from, to)
+{
+	var fromNode = ujmGetNode(from);
+	var toNode = ujmGetNode(to);
+
+	if (fromNode.classList.contains("ujmMapNode-end"))
+	{
+		$(fromNode).attr('data-original-title', 'Between node');
+		fromNode.classList.remove("ujmMapNode-end");
+		fromNode.classList.add("ujmMapNode-mid");
+	}
+	if (toNode.classList.contains("ujmMapNode-start"))
+	{
+		$(toNode).attr('data-original-title', 'Ending node');
+		toNode.classList.remove("ujmMapNode-start");
+		toNode.classList.add("ujmMapNode-end");
+	}
+}
+
+function ujmClearNodeLinks(nodeID)
+{
+
+}
+
+function ujmGetNodeLinks(node)
+{
+
+}
+
+function ujmGetNode(id)
+{
+	return $("#ujmMapNode-" + id)[0];
 }
 
 function ujmNodeId(node)
 {
-	return node.id.substr(node.id.indexOf('-')+1);
+	return node.id.substr(node.id.indexOf('-') + 1);
+}
+
+function ujmNodeEvent(node)
+{
+	return node.dataset.ujmEvent;
 }
 
 function ujmGetStuffs(session)
@@ -112,7 +266,7 @@ function ujmGetStuffs(session)
 
 	ujmDoQuery(session, ujmDoneCount, {session: session},
 		"SELECT count(*) FROM user_event_firebase " +
-		"WHERE user_id!='0' and " + ujmEventsSelector + " and " +
+		"WHERE user_id!='0' and " + ujmEventQuerySelector + " and " +
 		"timestamp between (extract('epoch' from '" + fromFormatted + "'::timestamp)*1000)::bigint " +
 		"and (extract('epoch' from '" + beforeFormatted + "'::timestamp)*1000)::bigint ");
 }
@@ -139,7 +293,7 @@ function ujmDoQuery(session, func, extra, query)
 	http.send(JSON.stringify(payload));
 }
 
-function ujmDoneCount(query, responseText, extra)
+function ujmDoneCount(query, responseText, ext)
 {
 	var from = moment($("#tab-user-journey #ujmFrom").val());
 	var before = moment($("#tab-user-journey #ujmBefore").val());
