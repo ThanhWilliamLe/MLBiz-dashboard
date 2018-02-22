@@ -12,6 +12,8 @@
 	      href='https://fonts.googleapis.com/css?family=Roboto:700,700italic,500,400,400italic,300,300italic'>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet"
+	      href="https://cdnjs.cloudflare.com/ajax/libs/jquery.scrollbar/0.2.11/jquery.scrollbar.min.css">
 	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
@@ -22,6 +24,7 @@
 	<script src="//cdnjs.cloudflare.com/ajax/libs/numeral.js/2.0.6/numeral.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
 	<script src="https://www.w3schools.com/lib/w3.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.scrollbar/0.2.11/jquery.scrollbar.min.js"></script>
 
 	<link rel="stylesheet" href="index.css">
 	<script src="session.js"></script>
@@ -77,6 +80,10 @@
 		a[index] = char;
 		return a.join("");
 	}
+	String.prototype.replaceAll = function(search, replacement) {
+		var target = this;
+		return target.replace(new RegExp(search, 'g'), replacement);
+	};
 
 	w3.includeHTML(initPage);
 
@@ -117,7 +124,7 @@
 			if (tab.id.includes(name))
 			{
 				tab.style.display = 'flex';
-				initTab(i+1);
+				initTab(i + 1);
 			}
 			else tab.style.display = 'none';
 		}
