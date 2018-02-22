@@ -81,7 +81,7 @@
 	height: 100%;
 }
 
-#ujmTheMap #ujmMapCanvas
+#ujmTheMap canvas
 {
 	pointer-events: none;
 	position: absolute;
@@ -89,6 +89,7 @@
 	height: 100vh;
 	top: 0;
 	left: 0;
+	z-index: 3;
 }
 
 #ujmTheMap .ujmMapRow
@@ -132,6 +133,7 @@
 	width: 15%;
 	height: 15%;
 	padding: 15%;
+	z-index: 4;
 }
 
 #ujmTheMap .ujmMapNode-mid
@@ -141,6 +143,7 @@
 	width: 15%;
 	height: 15%;
 	padding: 15%;
+	z-index: 4;
 }
 
 #ujmTheMap .ujmMapNode-end
@@ -150,6 +153,7 @@
 	width: 15%;
 	height: 15%;
 	padding: 15%;
+	z-index: 4;
 }
 
 #ujmTheMap .ujmNodeEvent

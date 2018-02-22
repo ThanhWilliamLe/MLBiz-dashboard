@@ -109,15 +109,25 @@ function ujmStartMapping()
 
 function ujmInitCanvas()
 {
-	var ctx = $("#ujmMapCanvas")[0].getContext('2d');
+	var ctx = $("#ujmMapCanvasTemp")[0].getContext('2d');
 	ctx.canvas.width = window.innerWidth;
 	ctx.canvas.height = window.innerHeight;
-	window.addEventListener('resize', function ()
+	$("#ujmTheMap")[0].addEventListener('resize', function ()
 	{
 		ctx.canvas.width = window.innerWidth;
 		ctx.canvas.height = window.innerHeight;
+		ujmUpdateLinkCanvas();
 	});
 
+	ctx = $("#ujmMapCanvasLinks")[0].getContext('2d');
+	ctx.canvas.width = window.innerWidth;
+	ctx.canvas.height = window.innerHeight;
+	$("#ujmTheMap")[0].addEventListener('resize', function ()
+	{
+		ctx.canvas.width = window.innerWidth;
+		ctx.canvas.height = window.innerHeight;
+		ujmUpdateLinkCanvas();
+	});
 }
 
 function ujmNodeClick(event)
@@ -161,14 +171,18 @@ function ujmNodeEmpty(node)
 
 function ujmSetNodeEvent(event, nodeID)
 {
+	if (ujmConfig.nodes == null) ujmConfig.nodes = {};
 	var node = $("#ujmMapNode-" + nodeID);
 	node[0].dataset.ujmEvent = event;
 	if (event == null || event == "")
 	{
 		ujmNodeEmpty(node[0]);
+		ujmClearNodeLinks(nodeID);
+		delete ujmConfig.nodes[nodeID];
 	}
 	else
 	{
+		ujmConfig.nodes[nodeID] = event;
 		node.attr('data-original-title', 'Starting node');
 		node.html('<h6 class="ujmNodeEvent">' + event + '</h6>');
 		node[0].classList.add("ujmMapNode-start");
@@ -180,7 +194,7 @@ function ujmSetNodeEvent(event, nodeID)
 			ev.dataTransfer.setData("fromNode", nodeID);
 		}
 		var nodeBound = node[0].getBoundingClientRect();
-		var ctx = $("#ujmMapCanvas")[0].getContext('2d');
+		var ctx = $("#ujmMapCanvasTemp")[0].getContext('2d');
 		node[0].ondrag = function (ev)
 		{
 			requestAnimationFrame(function ()
@@ -215,9 +229,12 @@ function ujmSetNodeEvent(event, nodeID)
 
 function ujmConnect(from, to)
 {
+	if (ujmConfig.connections == null) ujmConfig.connections = {};
+	if (ujmConfig.connections[from] == null) ujmConfig.connections[from] = [];
+	ujmConfig.connections[from].push(to);
+
 	var fromNode = ujmGetNode(from);
 	var toNode = ujmGetNode(to);
-
 	if (fromNode.classList.contains("ujmMapNode-end"))
 	{
 		$(fromNode).attr('data-original-title', 'Between node');
@@ -230,11 +247,54 @@ function ujmConnect(from, to)
 		toNode.classList.remove("ujmMapNode-start");
 		toNode.classList.add("ujmMapNode-end");
 	}
+	ujmUpdateLinkCanvas();
 }
 
 function ujmClearNodeLinks(nodeID)
 {
+	for (var to in ujmConfig.connections[nodeID])
+	{
 
+	}
+	delete ujmConfig.connections[nodeID];
+	Object.keys(ujmConfig.connections).forEach(function (from)
+	{
+		var connections = ujmConfig.connections[from];
+		for (var to in connections)
+		{
+			if (nodeID == connections[to]) delete connections[to];
+		}
+	});
+	ujmUpdateLinkCanvas();
+}
+
+function ujmUpdateLinkCanvas()
+{
+	var ctx = $("#ujmMapCanvasLinks")[0].getContext('2d');
+	ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+	Object.keys(ujmConfig.connections).forEach(function (from)
+	{
+		var connections = ujmConfig.connections[from];
+		var fromNode = ujmGetNode(from);
+		var fromBounds = fromNode.getBoundingClientRect();
+		var fromX = (fromBounds.left + fromBounds.right) / 2;
+		var fromY = (fromBounds.bottom + fromBounds.top) / 2;
+		console.log(connections);
+		for (var to in connections)
+		{
+			var toNode = ujmGetNode(connections[to]);
+			var toBounds = toNode.getBoundingClientRect();
+			var toX = (toBounds.left + toBounds.right) / 2;
+			var toY = (toBounds.bottom + toBounds.top) / 2;
+			ctx.beginPath();
+			ctx.setLineDash([3, 3]);
+			ctx.moveTo(fromX, fromY);
+			ctx.lineTo(toX, toY);
+			ctx.lineWidth = 3;
+			ctx.strokeStyle = 'white';
+			ctx.stroke();
+		}
+	});
 }
 
 function ujmGetNodeLinks(node)
