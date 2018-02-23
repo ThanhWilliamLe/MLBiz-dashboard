@@ -603,7 +603,10 @@ function ujmDisplayData()
 			var stepCount = ujmData.steps[fromID][toID];
 			var fromCount = ujmData.events[ujmData.nodes[fromID]].count;
 			var toCount = ujmData.events[ujmData.nodes[toID]].count;
-			var percentage = stepCount / fromCount * 100;
+			console.log(fromCount);
+			console.log(toCount);
+			console.log(stepCount);
+			var percentage = stepCount * 100 / fromCount;
 			if (fromCount == 0) percentage = 0;
 			if (percentage >= 1) percentage = Math.round(percentage);
 			else percentage = Math.round(percentage * 100) / 100;
