@@ -25,6 +25,8 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
 	<script src="https://www.w3schools.com/lib/w3.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.scrollbar/0.2.11/jquery.scrollbar.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/css-element-queries/1.0.1/ResizeSensor.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/css-element-queries/1.0.1/ElementQueries.min.js"></script>
 
 	<link rel="stylesheet" href="index.css">
 	<script src="session.js"></script>
@@ -74,6 +76,16 @@
 
 <script>
 	var tabsInitialized = [true, false, false];
+	jQuery.fn.rotate = function (degrees)
+	{
+		$(this).css({
+			'-webkit-transform': 'rotate(' + degrees + 'deg)',
+			'-moz-transform': 'rotate(' + degrees + 'deg)',
+			'-ms-transform': 'rotate(' + degrees + 'deg)',
+			'transform': 'rotate(' + degrees + 'deg)'
+		});
+		return $(this);
+	};
 	String.prototype.replaceAt = function (index, char)
 	{
 		var a = this.split("");
@@ -139,6 +151,7 @@
 
 	function clearClasses(ele)
 	{
+		if (ele == null || ele.classList == null) return;
 		var cl = ele.classList;
 		for (var i = cl.length; i > 0; i--)
 		{

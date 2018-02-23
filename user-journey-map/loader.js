@@ -2,10 +2,14 @@ var ujmConfig =
 	{
 		events: [],
 		grid: {},
-		connections: {},
+		connections:
+			{
+				from: {},
+				to: {}
+			},
 		nodes: {}
 	};
-var ujmEventQuerySelector = '';
+var ujmData = {};
 
 function userJourneyMapInit()
 {
@@ -27,6 +31,11 @@ function ujmGetEvents(session)
 		}
 	}
 	http.send();
+}
+
+function ujmUpdateSettings()
+{
+
 }
 
 function ujmInitEventSelector()
@@ -85,7 +94,11 @@ function ujmStartMapping()
 			cellsY: 5
 		};
 	ujmInitCanvas();
-	$(window).resize(ujmInitCanvas);
+	new ResizeSensor($("#ujmTheMap"), function ()
+	{
+		ujmInitCanvas();
+		ujmDisplayData();
+	});
 	for (var y = 0; y < ujmConfig.grid.cellsY; y++)
 	{
 		var gridRow = document.createElement("div");
@@ -116,7 +129,6 @@ function ujmStartMapping()
 
 function ujmInitCanvas()
 {
-	console.log(1);
 	var ctx = $("#ujmMapCanvasTemp")[0].getContext('2d');
 	var ctx1 = $("#ujmMapCanvasLinks")[0].getContext('2d');
 	ctx.canvas.width = window.innerWidth;
@@ -126,6 +138,22 @@ function ujmInitCanvas()
 	ujmUpdateLinkCanvas();
 }
 
+function ujmClearMap()
+{
+	ujmConfig.nodes = {};
+	ujmConfig.connections =
+		{
+			from: {},
+			to: {}
+		};
+	$(".ujmMapNode").each(function (id, node)
+	{
+		ujmNodeEmpty(node);
+	});
+	ujmUpdateLinkCanvas();
+	ujmDisplayData();
+}
+
 function ujmNodeClick(event)
 {
 	var node = ujmGetNodeOfMouseEvent(event);
@@ -133,8 +161,10 @@ function ujmNodeClick(event)
 	var id = ujmNodeId(node);
 	$("#ujmEventSelector").css('display', 'flex');
 	$("#ujmEventSelector")[0].dataset.nodeid = id;
+	$("#ujmEventSelectorInput")[0].focus();
 	$("#ujmEventSelectorTitle").html("Set an event for node " + id);
 	if (ujmNodeEvent(node) != null) $("#ujmEventSelectorInput")[0].value = ujmNodeEvent(node);
+	else $("#ujmEventSelectorInput")[0].value = "";
 }
 
 function ujmGetNodeOfMouseEvent(event)
@@ -293,7 +323,8 @@ function ujmClearNodeLinks(nodeID)
 	});
 	delete ujmConfig.connections.from[nodeID];
 	delete ujmConfig.connections.to[nodeID];
-	ujmUpdateNodeClass(nodeID);
+	if (ujmNodeEvent(ujmGetNode(nodeID)) != null) ujmUpdateNodeClass(nodeID);
+	else ujmNodeEmpty(ujmGetNode(nodeID));
 	ujmUpdateLinkCanvas();
 }
 
@@ -344,6 +375,14 @@ function ujmGetNode(id)
 	return $("#ujmMapNode-" + id)[0];
 }
 
+function ujmGetNodePos(id)
+{
+	var bounds = ujmGetNode(id).getBoundingClientRect();
+	var toX = (bounds.left + bounds.right) / 2;
+	var toY = (bounds.bottom + bounds.top) / 2;
+	return [toX, toY];
+}
+
 function ujmNodeId(node)
 {
 	return node.id.substr(node.id.indexOf('-') + 1);
@@ -356,12 +395,25 @@ function ujmNodeEvent(node)
 
 function ujmEventQuerySelector()
 {
-	var events = [];
-	// TODO
+	if (Object.keys(ujmConfig.nodes).length == 0) return "";
+	var first = true;
+	var string = "event_name=any(array[";
+	Object.keys(ujmConfig.nodes).forEach(function (node)
+	{
+		var nodeEvent = ujmConfig.nodes[node];
+		if (!first) string += ",";
+		string += "'" + nodeEvent + "'";
+		first = false;
+	});
+	string += "])"
+	return string;
 }
 
-function ujmGetStuffs(session)
+function ujmGetStuffs()
 {
+	if (Object.keys(ujmConfig.nodes).length = 0) return;
+	ujmInitDataStructure();
+
 	var from = moment($("#tab-user-journey #ujmFrom").val());
 	var before = moment($("#tab-user-journey #ujmBefore").val());
 	var fromFormatted = from.format('YYYY-MM-DD hh:mm:ss');
@@ -429,6 +481,7 @@ function ujmDoneCount(query, responseText, ext)
 		"WHERE user_id!='0' and " + ujmEventQuerySelector() + " and " +
 		"timestamp between (extract('epoch' from '" + fromFormatted + "'::timestamp)*1000)::bigint " +
 		"and (extract('epoch' from '" + beforeFormatted + "'::timestamp)*1000)::bigint " +
+		"ORDER BY user_id, timestamp asc, event_name " +
 		"LIMIT " + aStep);
 }
 
@@ -448,10 +501,13 @@ function ujmQueryContinue(query, responseText, extra)
 			"WHERE user_id!='0' and " + ujmEventQuerySelector() + " and " +
 			"timestamp between (extract('epoch' from '" + newExtra.from + "'::timestamp)*1000)::bigint " +
 			"and (extract('epoch' from '" + newExtra.to + "'::timestamp)*1000)::bigint " +
+			"ORDER BY user_id, timestamp asc, event_name " +
 			"LIMIT " + newExtra.aStep + " OFFSET " + newExtra.step * newExtra.aStep);
 	}
 	else
 	{
+		ujmProcessData();
+		ujmDisplayData();
 		/*
 		$("#ujmMap #ujmWaitingPlease")[0].classList.add("none");
 		$("#ujmMap #ujmTheMap")[0].classList.remove("none");
@@ -462,6 +518,114 @@ function ujmQueryContinue(query, responseText, extra)
 function ujmReceiveData(query, responseText, extra)
 {
 	var data = JSON.parse(responseText).data;
+	data.rows.forEach(function (row)
+	{
+		ujmData.raw.push(row);
+	});
 	extra.done += data.rows.length;
-	console.log(data);
+}
+
+function ujmInitDataStructure()
+{
+	ujmData =
+		{
+			nodes: ujmConfig.nodes,
+			events: {},
+			raw: [],
+			steps: {},
+			interval: $("#ujmJourneyTime").val()
+		};
+	Object.keys(ujmData.nodes).forEach(function (nodeID)
+	{
+		var event = ujmData.nodes[nodeID];
+		ujmData.events[event] = {node: nodeID, count: 0};
+		ujmData.steps[nodeID] = {};
+	});
+	Object.keys(ujmConfig.connections.from).forEach(function (nodeID)
+	{
+		var connections = ujmConfig.connections.from[nodeID];
+		connections.forEach(function (toID)
+		{
+			var str = nodeID + "-" + toID;
+			ujmData.steps[nodeID][toID] = 0;
+		});
+	});
+}
+
+function ujmProcessData()
+{
+	var interval = ujmData.interval * 1000;
+	ujmData.raw.forEach(function (row, index)
+	{
+		var timestamp = row[0];
+		var userId = row[1];
+		var eventName = row[2];
+		var eventNodeID = ujmData.events[eventName].node;
+		var platform = row[3];
+		ujmData.events[eventName].count++;
+		while (index < ujmData.raw.length - 1)
+		{
+			index++;
+			var nextRow = ujmData.raw[index];
+			var nextTimestamp = nextRow[0];
+			var nextUserId = nextRow[1];
+			var nextEventName = nextRow[2];
+			var nextEventNodeID = ujmData.events[nextEventName].node;
+			var nextPlatform = nextRow[3];
+
+			if (nextUserId != userId || nextPlatform != platform || nextTimestamp - timestamp > interval || eventName == nextEventName) break;
+
+			var currentStep = ujmData.steps[eventNodeID][nextEventNodeID];
+			if (currentStep != null && currentStep != undefined)
+			{
+				currentStep++
+				ujmData.steps[eventNodeID][nextEventNodeID] = currentStep;
+				break;
+			}
+		}
+	});
+}
+
+function ujmDisplayData()
+{
+	var viz = $("#ujmDataVis");
+	while (viz[0].firstChild)
+	{
+		viz[0].removeChild(viz[0].firstChild);
+	}
+
+	if (ujmData == null || ujmData.steps == null) return;
+
+	Object.keys(ujmData.steps).forEach(function (fromID)
+	{
+		Object.keys(ujmData.steps[fromID]).forEach(function (toID)
+		{
+			var stepCount = ujmData.steps[fromID][toID];
+			var fromCount = ujmData.events[ujmData.nodes[fromID]].count;
+			var toCount = ujmData.events[ujmData.nodes[toID]].count;
+			var percentage = stepCount / fromCount * 100;
+			if (fromCount == 0) percentage = 0;
+			if (percentage >= 1) percentage = Math.round(percentage);
+			else percentage = Math.round(percentage * 100) / 100;
+
+			var fromPos = ujmGetNodePos(fromID);
+			var toPos = ujmGetNodePos(toID);
+			var midX = (fromPos[0] + toPos[0]) / 2;
+			var midY = (fromPos[1] + toPos[1]) / 2;
+
+			var valueEle = document.createElement("h6");
+			valueEle.innerHTML = percentage + "%";
+			var displayEle = document.createElement("div");
+			displayEle.classList.add("ujmDataPercentage");
+			displayEle.append(valueEle);
+
+			viz.append(displayEle);
+			var angle = Math.atan2(toPos[1] - fromPos[1], toPos[0] - fromPos[0]) * 180 / Math.PI;
+			if (angle > 90 || angle <= -90) angle += 180;
+			$(valueEle).rotate(angle);
+
+			displayEle.style.left = midX - $(displayEle).outerWidth() / 2 + "px";
+			displayEle.style.top = midY - $(displayEle).outerHeight() / 2 + "px";
+		});
+	})
 }

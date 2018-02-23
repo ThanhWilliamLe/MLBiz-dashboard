@@ -1,3 +1,5 @@
+var session;
+
 function fetchSessionAndStart(func)
 {
 	var xhrOldSession = new XMLHttpRequest();
@@ -6,7 +8,7 @@ function fetchSessionAndStart(func)
 	{
 		if (xhrOldSession.readyState == 4 && xhrOldSession.status == 200)
 		{
-			var session = xhrOldSession.responseText;
+			session = xhrOldSession.responseText;
 			if (session != null && session != "" && session.length > 0 && /\s/.test(session) == false && testSession(session))
 			{
 				func(session);
@@ -25,7 +27,7 @@ function fetchSessionAndStart(func)
 							if (/\s/.test(xhrNewSession.responseText) == false && xhrNewSession.responseText != null && xhrNewSession.responseText != "")
 							{
 								session = JSON.parse(xhrNewSession.responseText).id;
-								pktStartQuerying(session);
+								func(session);
 								xhrOldSession.open('POST', './session.php', true);
 								xhrOldSession.send(JSON.stringify({session: session}));
 							}
@@ -37,8 +39,8 @@ function fetchSessionAndStart(func)
 					}
 				};
 				xhrNewSession.send(JSON.stringify({
-					username: "thanhletien.william@gmail.com",
-					password: "zxcasdqwe123"
+					username: "thanhlt@moneylover.me",
+					password: "12369874"
 				}));
 			}
 		}
