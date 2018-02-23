@@ -109,55 +109,51 @@
 #ujmTheMap .ujmMapNode
 {
 	cursor: default;
-	color: #222;
-	background-color: #242424;
-	width: 10%;
-	height: 10%;
-	padding: 10%;
-	border-radius: 100%;
+	color: white;
 	margin: auto;
 	display: flex;
-	line-height: 0;
 	justify-content: center;
+	border-radius: 100%;
+	line-height: 0;
+	width: 20%;
+	height: 20%;
+	padding: 20%;
+	z-index: 4;
 }
 
-#ujmTheMap [class="ujmMapNode"]:hover
+#ujmTheMap .ujmMapNode-none:hover
 {
 	background-color: darkgray;
 }
 
-#ujmTheMap .ujmMapNode-start
+#ujmTheMap .ujmMapNode-none
 {
-	color: white;
-	background-color: seagreen;
+	color: #252525;
+	background-color: #252525;
 	width: 15%;
 	height: 15%;
 	padding: 15%;
-	z-index: 4;
+	z-index: 1;
+}
+
+#ujmTheMap .ujmMapNode-start
+{
+	background-color: seagreen;
 }
 
 #ujmTheMap .ujmMapNode-mid
 {
-	color: white;
 	background-color: cornflowerblue;
-	width: 15%;
-	height: 15%;
-	padding: 15%;
-	z-index: 4;
 }
 
 #ujmTheMap .ujmMapNode-end
 {
-	color: white;
 	background-color: burlywood;
-	width: 15%;
-	height: 15%;
-	padding: 15%;
-	z-index: 4;
 }
 
 #ujmTheMap .ujmNodeEvent
 {
 	line-height: 0;
 	z-index: 5;
+	text-shadow: 2px 2px 2px black;
 }

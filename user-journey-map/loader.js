@@ -1,4 +1,10 @@
-var ujmConfig = {};
+var ujmConfig =
+	{
+		events: [],
+		grid: {},
+		connections: {},
+		nodes: {}
+	};
 var ujmEventQuerySelector = '';
 
 function userJourneyMapInit()
@@ -79,6 +85,7 @@ function ujmStartMapping()
 			cellsY: 5
 		};
 	ujmInitCanvas();
+	$(window).resize(ujmInitCanvas);
 	for (var y = 0; y < ujmConfig.grid.cellsY; y++)
 	{
 		var gridRow = document.createElement("div");
@@ -109,25 +116,14 @@ function ujmStartMapping()
 
 function ujmInitCanvas()
 {
+	console.log(1);
 	var ctx = $("#ujmMapCanvasTemp")[0].getContext('2d');
+	var ctx1 = $("#ujmMapCanvasLinks")[0].getContext('2d');
 	ctx.canvas.width = window.innerWidth;
 	ctx.canvas.height = window.innerHeight;
-	$("#ujmTheMap")[0].addEventListener('resize', function ()
-	{
-		ctx.canvas.width = window.innerWidth;
-		ctx.canvas.height = window.innerHeight;
-		ujmUpdateLinkCanvas();
-	});
-
-	ctx = $("#ujmMapCanvasLinks")[0].getContext('2d');
-	ctx.canvas.width = window.innerWidth;
-	ctx.canvas.height = window.innerHeight;
-	$("#ujmTheMap")[0].addEventListener('resize', function ()
-	{
-		ctx.canvas.width = window.innerWidth;
-		ctx.canvas.height = window.innerHeight;
-		ujmUpdateLinkCanvas();
-	});
+	ctx1.canvas.width = window.innerWidth;
+	ctx1.canvas.height = window.innerHeight;
+	ujmUpdateLinkCanvas();
 }
 
 function ujmNodeClick(event)
@@ -157,6 +153,7 @@ function ujmNodeEmpty(node)
 {
 	clearClasses(node);
 	node.classList.add("ujmMapNode");
+	node.classList.add("ujmMapNode-none");
 	$(node).tooltip('dispose');
 	node['data-toggle'] = "tooltip";
 	node['title'] = "Add an event here";
@@ -185,6 +182,7 @@ function ujmSetNodeEvent(event, nodeID)
 		ujmConfig.nodes[nodeID] = event;
 		node.attr('data-original-title', 'Starting node');
 		node.html('<h6 class="ujmNodeEvent">' + event + '</h6>');
+		node[0].classList.remove("ujmMapNode-none");
 		node[0].classList.add("ujmMapNode-start");
 		node[0].draggable = true;
 		node[0].ondragstart = function (ev)
@@ -193,12 +191,12 @@ function ujmSetNodeEvent(event, nodeID)
 			ev.dataTransfer.dropEffect = "move";
 			ev.dataTransfer.setData("fromNode", nodeID);
 		}
-		var nodeBound = node[0].getBoundingClientRect();
 		var ctx = $("#ujmMapCanvasTemp")[0].getContext('2d');
 		node[0].ondrag = function (ev)
 		{
 			requestAnimationFrame(function ()
 			{
+				var nodeBound = node[0].getBoundingClientRect();
 				ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
 				ctx.beginPath();
 				ctx.setLineDash([5, 3]);
@@ -229,42 +227,73 @@ function ujmSetNodeEvent(event, nodeID)
 
 function ujmConnect(from, to)
 {
-	if (ujmConfig.connections == null) ujmConfig.connections = {};
-	if (ujmConfig.connections[from] == null) ujmConfig.connections[from] = [];
-	ujmConfig.connections[from].push(to);
-
-	var fromNode = ujmGetNode(from);
-	var toNode = ujmGetNode(to);
-	if (fromNode.classList.contains("ujmMapNode-end"))
-	{
-		$(fromNode).attr('data-original-title', 'Between node');
-		fromNode.classList.remove("ujmMapNode-end");
-		fromNode.classList.add("ujmMapNode-mid");
-	}
-	if (toNode.classList.contains("ujmMapNode-start"))
-	{
-		$(toNode).attr('data-original-title', 'Ending node');
-		toNode.classList.remove("ujmMapNode-start");
-		toNode.classList.add("ujmMapNode-end");
-	}
+	if (from == to) return;
+	if (ujmConfig.connections == null) ujmConfig.connections = {from: {}, to: {}};
+	if (ujmConfig.connections.from[from] == null) ujmConfig.connections.from[from] = [to];
+	else if (!ujmConfig.connections.from[from].includes(to)) ujmConfig.connections.from[from].push(to);
+	if (ujmConfig.connections.to[to] == null) ujmConfig.connections.to[to] = [from];
+	else if (!ujmConfig.connections.to[to].includes(from)) ujmConfig.connections.to[to].push(from);
+	ujmUpdateNodeClass(from);
+	ujmUpdateNodeClass(to);
 	ujmUpdateLinkCanvas();
+}
+
+function ujmUpdateNodeClass(nodeID)
+{
+	if (nodeID == null) return;
+	var node = ujmGetNode(nodeID);
+	var links = ujmGetNodeLinks(nodeID);
+	node.classList.remove("ujmMapNode-none");
+	node.classList.remove("ujmMapNode-start");
+	node.classList.remove("ujmMapNode-mid");
+	node.classList.remove("ujmMapNode-end");
+	if (links.from != null && links.from.length != 0 && links.to != null && links.to.length != 0)
+	{
+		$(node).attr('data-original-title', 'Between node');
+		node.classList.add("ujmMapNode-mid");
+	}
+	else if (links.to != null && links.to.length != 0)
+	{
+		$(node).attr('data-original-title', 'Ending node');
+		node.classList.add("ujmMapNode-end");
+	}
+	else
+	{
+		$(node).attr('data-original-title', 'Starting node');
+		node.classList.add("ujmMapNode-start");
+	}
 }
 
 function ujmClearNodeLinks(nodeID)
 {
-	for (var to in ujmConfig.connections[nodeID])
+	Object.keys(ujmConfig.connections.from).forEach(function (from)
 	{
-
-	}
-	delete ujmConfig.connections[nodeID];
-	Object.keys(ujmConfig.connections).forEach(function (from)
-	{
-		var connections = ujmConfig.connections[from];
-		for (var to in connections)
+		var connections = ujmConfig.connections.from[from];
+		console.log(from + "  " + connections);
+		for (var id in connections)
 		{
-			if (nodeID == connections[to]) delete connections[to];
+			if (nodeID == connections[id])
+			{
+				delete connections[id];
+				ujmUpdateNodeClass(from);
+			}
 		}
 	});
+	Object.keys(ujmConfig.connections.to).forEach(function (to)
+	{
+		var connections = ujmConfig.connections.to[to];
+		for (var id in connections)
+		{
+			if (nodeID == connections[id])
+			{
+				delete connections[id];
+				ujmUpdateNodeClass(to);
+			}
+		}
+	});
+	delete ujmConfig.connections.from[nodeID];
+	delete ujmConfig.connections.to[nodeID];
+	ujmUpdateNodeClass(nodeID);
 	ujmUpdateLinkCanvas();
 }
 
@@ -272,14 +301,14 @@ function ujmUpdateLinkCanvas()
 {
 	var ctx = $("#ujmMapCanvasLinks")[0].getContext('2d');
 	ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-	Object.keys(ujmConfig.connections).forEach(function (from)
+	if (ujmConfig.connections == null) ujmConfig.connections = {from: {}, to: {}};
+	Object.keys(ujmConfig.connections.from).forEach(function (from)
 	{
-		var connections = ujmConfig.connections[from];
+		var connections = ujmConfig.connections.from[from];
 		var fromNode = ujmGetNode(from);
 		var fromBounds = fromNode.getBoundingClientRect();
 		var fromX = (fromBounds.left + fromBounds.right) / 2;
 		var fromY = (fromBounds.bottom + fromBounds.top) / 2;
-		console.log(connections);
 		for (var to in connections)
 		{
 			var toNode = ujmGetNode(connections[to]);
@@ -287,19 +316,27 @@ function ujmUpdateLinkCanvas()
 			var toX = (toBounds.left + toBounds.right) / 2;
 			var toY = (toBounds.bottom + toBounds.top) / 2;
 			ctx.beginPath();
-			ctx.setLineDash([3, 3]);
+			//ctx.setLineDash([3, 3]);
 			ctx.moveTo(fromX, fromY);
 			ctx.lineTo(toX, toY);
-			ctx.lineWidth = 3;
-			ctx.strokeStyle = 'white';
+			ctx.lineWidth = parseInt($(fromNode).css('paddingLeft'));
+			ctx.strokeStyle = '#607DD1';
 			ctx.stroke();
 		}
 	});
 }
 
-function ujmGetNodeLinks(node)
+function ujmGetNodeLinks(nodeID)
 {
-
+	var fromLinks = ujmConfig.connections.from[nodeID];
+	var toLinks = ujmConfig.connections.to[nodeID];
+	if (fromLinks != null) fromLinks = fromLinks.filter(Boolean);
+	if (toLinks != null) toLinks = toLinks.filter(Boolean);
+	return {
+		node: nodeID,
+		from: fromLinks,
+		to: toLinks
+	}
 }
 
 function ujmGetNode(id)
@@ -317,6 +354,12 @@ function ujmNodeEvent(node)
 	return node.dataset.ujmEvent;
 }
 
+function ujmEventQuerySelector()
+{
+	var events = [];
+	// TODO
+}
+
 function ujmGetStuffs(session)
 {
 	var from = moment($("#tab-user-journey #ujmFrom").val());
@@ -326,7 +369,7 @@ function ujmGetStuffs(session)
 
 	ujmDoQuery(session, ujmDoneCount, {session: session},
 		"SELECT count(*) FROM user_event_firebase " +
-		"WHERE user_id!='0' and " + ujmEventQuerySelector + " and " +
+		"WHERE user_id!='0' and " + ujmEventQuerySelector() + " and " +
 		"timestamp between (extract('epoch' from '" + fromFormatted + "'::timestamp)*1000)::bigint " +
 		"and (extract('epoch' from '" + beforeFormatted + "'::timestamp)*1000)::bigint ");
 }
@@ -383,7 +426,7 @@ function ujmDoneCount(query, responseText, ext)
 
 	ujmDoQuery(extra.session, ujmQueryContinue, extra,
 		"SELECT timestamp, user_id, event_name, platform FROM user_event_firebase " +
-		"WHERE user_id!='0' and " + ujmEventsSelector + " and " +
+		"WHERE user_id!='0' and " + ujmEventQuerySelector() + " and " +
 		"timestamp between (extract('epoch' from '" + fromFormatted + "'::timestamp)*1000)::bigint " +
 		"and (extract('epoch' from '" + beforeFormatted + "'::timestamp)*1000)::bigint " +
 		"LIMIT " + aStep);
@@ -402,7 +445,7 @@ function ujmQueryContinue(query, responseText, extra)
 		newExtra.step++;
 		ujmDoQuery(newExtra.session, ujmQueryContinue, newExtra,
 			"SELECT timestamp, user_id, event_name, platform FROM user_event_firebase " +
-			"WHERE user_id!='0' and " + ujmEventsSelector + " and " +
+			"WHERE user_id!='0' and " + ujmEventQuerySelector() + " and " +
 			"timestamp between (extract('epoch' from '" + newExtra.from + "'::timestamp)*1000)::bigint " +
 			"and (extract('epoch' from '" + newExtra.to + "'::timestamp)*1000)::bigint " +
 			"LIMIT " + newExtra.aStep + " OFFSET " + newExtra.step * newExtra.aStep);
